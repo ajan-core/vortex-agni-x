@@ -2,17 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>VORTEX-AJ x AGNI-X</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VORTEX-AJ | AGNI-X SUPREME</title>
     <style>
-        body { background: #000; color: #ff4500; font-family: sans-serif; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100vh; margin: 0; }
-        h1 { font-size: 50px; letter-spacing: 10px; text-shadow: 0 0 20px #ff4500; }
-        p { color: gold; letter-spacing: 5px; font-size: 18px; }
+        :root { --main-fire: #ff4500; --vip-gold: #ffd700; --bg-dark: #0a0a0a; }
+        body { background-color: var(--bg-dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        
+        /* Studio Outer Frame */
+        .studio-frame { position: relative; width: 90%; max-width: 400px; height: 80vh; border: 2px solid var(--main-fire); border-radius: 30px; background: rgba(255, 69, 0, 0.05); box-shadow: 0 0 50px rgba(255, 69, 0, 0.2); display: flex; flex-direction: column; padding: 20px; backdrop-filter: blur(10px); }
+        
+        /* Inner Display */
+        .display-screen { flex: 1; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 20px; background: rgba(0, 0, 0, 0.6); margin-top: 10px; overflow-y: auto; padding: 15px; text-align: center; }
+        
+        .logo-area { font-weight: bold; letter-spacing: 5px; color: var(--vip-gold); margin-bottom: 5px; font-size: 20px; }
+        .engine-status { font-size: 10px; color: #00ff00; margin-bottom: 20px; text-transform: uppercase; }
+
+        /* VIP Buttons */
+        .control-btn { background: linear-gradient(145deg, #222, #000); border: 1px solid var(--main-fire); color: white; padding: 15px; width: 100%; border-radius: 12px; margin: 10px 0; cursor: pointer; transition: 0.3s; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+        .control-btn:hover { background: var(--main-fire); color: black; box-shadow: 0 0 20px var(--main-fire); transform: translateY(-3px); }
+        
+        /* Glitch Effect for AGNI-X */
+        .agni-title { font-size: 40px; color: var(--main-fire); text-shadow: 2px 2px black, 0 0 15px var(--main-fire); }
     </style>
 </head>
 <body>
-    <h1>VORTEX-AJ</h1>
-    <p>POWERED BY AGNI-X</p>
-    <div style="margin-top: 50px; color: #444;">SYSTEM STATUS: ONLINE</div>
+
+    <div class="studio-frame">
+        <div class="logo-area">VORTEX-AJ</div>
+        <div class="engine-status">● AGNI-X CORE: ONLINE (SECURE)</div>
+
+        <div class="display-screen">
+            <h1 class="agni-title">AGNI-X</h1>
+            <p style="font-size: 12px; color: #aaa;">SUPREME STUDIO INTERFACE</p>
+            <hr style="border: 0.1px solid #333; margin: 20px 0;">
+            
+            <button class="control-btn" onclick="act('RECORDING')">ACTIVATE 4K RECORDER</button>
+            <button class="control-btn" style="border-color: var(--vip-gold); color: var(--vip-gold);" onclick="act('BUILDER')">GTA-6 ENGINE MODE</button>
+            <button class="control-btn" onclick="act('DUBBING')">AI ANIME DUBBING</button>
+        </div>
+
+        <p style="font-size: 10px; color: #555; text-align: center; margin-top: 15px;">DEVELOPED BY AJ STUDIO & AGNI-X</p>
+    </div>
+
+    <script>
+        function act(type) {
+            alert("🚀 AGNI-X Notification: " + type + " System Initialized!");
+        }
+    </script>
+
 </body>
 </html>
-
