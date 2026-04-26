@@ -1,0 +1,15 @@
+body { background: #000; margin: 0; overflow: hidden; font-family: monospace; }
+canvas { position: absolute; top: 0; left: 0; z-index: -1; }
+.studio-box {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 320px; background: rgba(0,0,0,0.9); border: 1px solid #ff4500;
+    padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 0 30px #ff4500;
+}
+.title { color: #ff4500; font-size: 30px; letter-spacing: 5px; }
+.sub-title { color: gold; font-size: 10px; margin-bottom: 20px; }
+.btn {
+    background: transparent; border: 1px solid #ff4500; color: #ff4500;
+    padding: 10px; width: 100%; margin: 5px 0; cursor: pointer; border-radius: 5px;
+}
+.btn:hover { background: #ff4500; color: #000; }
+
