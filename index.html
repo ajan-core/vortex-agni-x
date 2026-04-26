@@ -1,20 +1,450 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VORTEX-AJ | AGNI-X STUDIO</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VORTEX-AJ Full Studio Engine</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap');
+
+    :root {
+      --bg: #050505;
+      --fire: #ff5a00;
+      --fire-soft: #ff8a00;
+      --gold: #f6cf52;
+      --panel: rgba(10, 10, 10, 0.78);
+      --line: rgba(255, 120, 0, 0.32);
+      --text: #ffd38e;
+      --ok: #6dff9b;
+      --danger: #ff3b3b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1a0f08 0%, var(--bg) 40%);
+      color: var(--text);
+      font-family: 'Orbitron', 'Courier New', monospace;
+      overflow: hidden;
+    }
+
+    #matrix {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.95;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      padding: 14px;
+      backdrop-filter: blur(1px);
+    }
+
+    .header {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 10px 14px;
+      box-shadow: 0 0 24px rgba(255, 88, 0, 0.24);
+    }
+
+    .title {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(1rem, 4vw, 1.4rem);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(246, 207, 82, 0.45);
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 0.7rem;
+      letter-spacing: 0.11em;
+      color: #ffb36f;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: inset 0 0 16px rgba(255, 115, 0, 0.16);
+    }
+
+    .hud {
+      position: relative;
+      border: 1px solid rgba(246, 207, 82, 0.32);
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 9 / 16;
+      max-height: 52vh;
+      margin: 0 auto;
+      width: min(100%, 390px);
+      background: #090909;
+      box-shadow: 0 0 25px rgba(255, 80, 0, 0.35);
+    }
+
+    #camera {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .scan {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(to right, transparent, var(--fire), transparent);
+      animation: scan 2.8s linear infinite;
+      box-shadow: 0 0 15px var(--fire);
+    }
+
+    @keyframes scan {
+      from { top: -4%; }
+      to { top: 104%; }
+    }
+
+    .corners span {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      border-color: var(--gold);
+      border-style: solid;
+      filter: drop-shadow(0 0 6px rgba(246, 207, 82, 0.55));
+    }
+    .corners .tl { top: 8px; left: 8px; border-width: 3px 0 0 3px; }
+    .corners .tr { top: 8px; right: 8px; border-width: 3px 3px 0 0; }
+    .corners .bl { bottom: 8px; left: 8px; border-width: 0 0 3px 3px; }
+    .corners .br { bottom: 8px; right: 8px; border-width: 0 3px 3px 0; }
+
+    .hud-label {
+      position: absolute;
+      bottom: 8px;
+      left: 10px;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      padding: 4px 7px;
+      border: 1px solid rgba(255, 114, 0, 0.6);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .controls {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      border: 1px solid rgba(255, 131, 0, 0.8);
+      color: #ffd89f;
+      background: linear-gradient(180deg, rgba(255, 103, 0, 0.18), rgba(255, 98, 0, 0.05));
+      border-radius: 10px;
+      padding: 11px 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.74rem;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 0 14px rgba(255, 95, 0, 0.45), inset 0 0 12px rgba(255, 130, 0, 0.15);
+      transition: transform .08s ease, box-shadow .15s ease;
+    }
+    .btn:active { transform: scale(0.98); box-shadow: 0 0 24px rgba(255, 120, 0, 0.8); }
+
+    .rec-status {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 0.74rem;
+      min-height: 20px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+      opacity: 0;
+    }
+
+    .dot.active {
+      opacity: 1;
+      animation: blink 1s step-start infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0.2; } }
+
+    .dub-box {
+      margin-top: 8px;
+      border-top: 1px dashed rgba(255, 150, 55, 0.5);
+      padding-top: 10px;
+    }
+
+    .wave {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 36px;
+      margin-top: 8px;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+
+    .wave.active { opacity: 1; }
+
+    .bar {
+      width: 5px;
+      background: linear-gradient(var(--gold), var(--fire));
+      height: 8px;
+      border-radius: 6px;
+      animation: wave 0.8s ease-in-out infinite alternate;
+      box-shadow: 0 0 10px rgba(255, 105, 0, 0.5);
+    }
+
+    .bar:nth-child(2) { animation-delay: .08s; }
+    .bar:nth-child(3) { animation-delay: .16s; }
+    .bar:nth-child(4) { animation-delay: .24s; }
+    .bar:nth-child(5) { animation-delay: .32s; }
+    .bar:nth-child(6) { animation-delay: .4s; }
+    .bar:nth-child(7) { animation-delay: .48s; }
+
+    @keyframes wave { from { height: 8px; } to { height: 34px; } }
+
+    .statusbar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat {
+      border: 1px solid rgba(255, 140, 0, 0.48);
+      border-radius: 9px;
+      padding: 8px;
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(0, 0, 0, 0.45);
+      color: #ffd9a2;
+    }
+    .val { display: block; margin-top: 4px; color: var(--ok); font-size: 0.8rem; }
+  </style>
 </head>
 <body>
-    <canvas id="matrix"></canvas>
-    <div class="studio-box">
-        <h1 class="title">AGNI-X</h1>
-        <p class="sub-title">CORE SYSTEM v1.0</p>
-        <div id="status">STATUS: SECURE</div>
-        <button class="btn" onclick="initialize()">INITIALIZE CORE</button>
-        <button class="btn" onclick="startRecorder()">4K RECORDER</button>
-    </div>
-    <script src="script.js"></script>
+  <canvas id="matrix"></canvas>
+
+  <main class="app">
+    <section class="header">
+      <h1 class="title">VORTEX-AJ /// FULL STUDIO ENGINE</h1>
+      <div class="subtitle">BLACK · FIRE-ORANGE · CYBER-GOLD | USER PROFILE: ALI JAAN</div>
+    </section>
+
+    <section class="content">
+      <article class="panel">
+        <div class="hud">
+          <video id="camera" autoplay muted playsinline></video>
+          <div class="scan"></div>
+          <div class="corners">
+            <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+          </div>
+          <div class="hud-label">THE EYE // LIVE FRONT CAMERA</div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="initBtn">Initialize • THE BRAIN (Voice AI)</button>
+          <button class="btn" id="recBtn">4K Recorder</button>
+        </div>
+
+        <div class="rec-status">
+          <span class="dot" id="recDot"></span>
+          <span id="recText">Recorder idle.</span>
+        </div>
+
+        <div class="dub-box">
+          <button class="btn" id="uploadBtn">AI Dubbing Suite • Upload Audio</button>
+          <input id="audioInput" type="file" accept="audio/*" hidden />
+          <div id="dubText" style="margin-top:6px;font-size:.7rem;">No file loaded.</div>
+          <div class="wave" id="wave">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="panel statusbar">
+      <div class="stat">Core Temp <span class="val" id="temp">42°C</span></div>
+      <div class="stat">AI Sync <span class="val" id="sync">98%</span></div>
+      <div class="stat">User <span class="val">ALI JAAN</span></div>
+    </footer>
+  </main>
+
+  <script>
+    // Orange Matrix Rain (V O R T E X)
+    const matrix = document.getElementById('matrix');
+    const mtx = matrix.getContext('2d');
+    const glyphs = 'VORTEX';
+    const fontSize = 16;
+    let columns, drops;
+
+    function resizeMatrix() {
+      matrix.width = window.innerWidth;
+      matrix.height = window.innerHeight;
+      columns = Math.floor(matrix.width / fontSize);
+      drops = new Array(columns).fill(1);
+    }
+
+    function drawMatrix() {
+      mtx.fillStyle = 'rgba(0,0,0,0.08)';
+      mtx.fillRect(0, 0, matrix.width, matrix.height);
+      mtx.fillStyle = '#ff6200';
+      mtx.font = fontSize + 'px Courier New';
+      for (let i = 0; i < drops.length; i++) {
+        const t = glyphs[Math.floor(Math.random() * glyphs.length)];
+        mtx.fillText(t, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > matrix.height && Math.random() > 0.97) drops[i] = 0;
+        drops[i]++;
+      }
+      requestAnimationFrame(drawMatrix);
+    }
+
+    resizeMatrix();
+    drawMatrix();
+    window.addEventListener('resize', resizeMatrix);
+
+    // Cyber click sound
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = AudioContextClass ? new AudioContextClass() : null;
+
+    function cyberClick() {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(340, audioCtx.currentTime + 0.06);
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.07);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.07);
+    }
+
+    // THE EYE: live front camera
+    const camera = document.getElementById('camera');
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' },
+          audio: false
+        });
+        camera.srcObject = stream;
+      } catch {
+        document.getElementById('recText').textContent = 'Camera blocked. Allow permission for THE EYE.';
+      }
+    }
+    startCamera();
+
+    // THE BRAIN: Voice AI initialization
+    const initBtn = document.getElementById('initBtn');
+    initBtn.addEventListener('click', () => {
+      cyberClick();
+      const line = 'Vortex Core Online. Welcome, Ali Jaan.';
+      const msg = new SpeechSynthesisUtterance(line);
+      msg.pitch = 1.25;
+      msg.rate = 0.95;
+      msg.volume = 1;
+      const voices = speechSynthesis.getVoices();
+      const femaleCandidate = voices.find(v => /female|zira|samantha|google us english/i.test(v.name));
+      if (femaleCandidate) msg.voice = femaleCandidate;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(msg);
+      document.getElementById('recText').textContent = 'Vortex core initialized.';
+    });
+
+    // 4K recorder simulation
+    const recBtn = document.getElementById('recBtn');
+    const recDot = document.getElementById('recDot');
+    const recText = document.getElementById('recText');
+    let recTimer = null;
+    let seconds = 0;
+
+    function fmtTime(s) {
+      const mm = String(Math.floor(s / 60)).padStart(2, '0');
+      const ss = String(s % 60).padStart(2, '0');
+      return `${mm}:${ss}`;
+    }
+
+    recBtn.addEventListener('click', () => {
+      cyberClick();
+      if (recTimer) {
+        clearInterval(recTimer);
+        recTimer = null;
+        recDot.classList.remove('active');
+        recText.textContent = `REC stopped at ${fmtTime(seconds)}.`;
+        recBtn.textContent = '4K Recorder';
+        return;
+      }
+      seconds = 0;
+      recDot.classList.add('active');
+      recBtn.textContent = 'Stop Recorder';
+      recText.textContent = `REC • 00:00 • Simulated 4K high-fidelity capture`;
+      recTimer = setInterval(() => {
+        seconds++;
+        recText.textContent = `REC • ${fmtTime(seconds)} • Simulated 4K high-fidelity capture`;
+      }, 1000);
+    });
+
+    // AI Dubbing suite
+    const uploadBtn = document.getElementById('uploadBtn');
+    const audioInput = document.getElementById('audioInput');
+    const wave = document.getElementById('wave');
+    const dubText = document.getElementById('dubText');
+
+    uploadBtn.addEventListener('click', () => {
+      cyberClick();
+      audioInput.click();
+    });
+
+    audioInput.addEventListener('change', () => {
+      const file = audioInput.files?.[0];
+      if (!file) return;
+      dubText.textContent = `File loaded: ${file.name} • AI Processing...`;
+      wave.classList.add('active');
+      setTimeout(() => {
+        wave.classList.remove('active');
+        dubText.textContent = `Dubbing complete: ${file.name}`;
+      }, 3200);
+    });
+
+    // Live system status simulation
+    const tempEl = document.getElementById('temp');
+    const syncEl = document.getElementById('sync');
+
+    setInterval(() => {
+      const temp = (42 + (Math.random() * 2 - 1)).toFixed(1);
+      const sync = Math.max(95, Math.min(100, 98 + (Math.random() * 2 - 1))).toFixed(1);
+      tempEl.textContent = `${temp}°C`;
+      syncEl.textContent = `${sync}%`;
+    }, 1500);
+  </script>
 </body>
 </html>
