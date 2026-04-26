@@ -1,20 +1,440 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VORTEX-AJ | AGNI-X STUDIO</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VORTEX-AJ Full Studio Engine</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap');
+
+    :root {
+      --bg: #050505;
+      --fire: #ff5a00;
+      --fire-soft: #ff7a33;
+      --gold: #f7c948;
+      --cyber: #ffd86b;
+      --panel: rgba(0, 0, 0, 0.72);
+      --border: rgba(255, 122, 51, 0.65);
+      --glow: 0 0 10px rgba(255, 90, 0, 0.8), 0 0 20px rgba(247, 201, 72, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      overflow: hidden;
+    }
+
+    #matrix {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.95;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      backdrop-filter: blur(1.5px);
+      padding: 14px;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--glow);
+    }
+
+    .header {
+      padding: 12px 14px;
+      text-align: center;
+      letter-spacing: 1.5px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--fire-soft);
+    }
+
+    .header p {
+      margin: 6px 0 0;
+      color: var(--gold);
+      font-size: 0.74rem;
+      opacity: 0.9;
+    }
+
+    .eye-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9/12;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 90, 0, 0.8);
+      background: #0d0d0d;
+    }
+
+    #camera {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: contrast(1.08) saturate(1.05);
+      background: #0b0b0b;
+    }
+
+    .hud {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+    }
+
+    .corner {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border: 2px solid var(--cyber);
+      box-shadow: 0 0 8px rgba(247, 201, 72, 0.9);
+    }
+
+    .tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+    .tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+    .bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+    .br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+    .scan {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--fire), transparent);
+      box-shadow: 0 0 12px var(--fire);
+      animation: sweep 2.6s linear infinite;
+    }
+
+    @keyframes sweep {
+      0% { top: 8%; opacity: 0.25; }
+      50% { opacity: 0.95; }
+      100% { top: 90%; opacity: 0.25; }
+    }
+
+    .controls,
+    .dubbing {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      border: 1px solid var(--fire-soft);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255, 120, 35, 0.18), rgba(0, 0, 0, 0.45));
+      color: #fff;
+      font-family: inherit;
+      letter-spacing: 1px;
+      padding: 11px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: var(--glow);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+      box-shadow: 0 0 18px rgba(255, 90, 0, 0.95);
+      background: linear-gradient(180deg, rgba(255, 120, 35, 0.35), rgba(0, 0, 0, 0.6));
+    }
+
+    .readout {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: #ffdcb3;
+      gap: 8px;
+    }
+
+    .rec {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #ff3c24;
+      font-weight: 700;
+      visibility: hidden;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ff2d2d;
+      box-shadow: 0 0 10px #ff2d2d;
+      animation: blink 1s steps(1, end) infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .waves {
+      height: 44px;
+      border-radius: 10px;
+      border: 1px dashed rgba(247, 201, 72, 0.5);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 3px;
+      padding: 7px 6px;
+      overflow: hidden;
+      background: rgba(255, 90, 0, 0.08);
+    }
+
+    .bar {
+      width: 3px;
+      height: 8px;
+      background: var(--gold);
+      box-shadow: 0 0 8px rgba(247, 201, 72, 0.6);
+      animation: idle 1.2s ease-in-out infinite;
+      animation-play-state: paused;
+    }
+
+    .processing .bar { animation-play-state: running; }
+
+    @keyframes idle {
+      0%, 100% { transform: scaleY(0.3); opacity: 0.4; }
+      50% { transform: scaleY(1.9); opacity: 1; }
+    }
+
+    .statusbar {
+      margin-top: auto;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      font-size: 0.73rem;
+      text-align: center;
+    }
+
+    .statusbar div {
+      border: 1px solid rgba(247, 201, 72, 0.45);
+      border-radius: 10px;
+      padding: 7px 5px;
+      color: #ffe8b5;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .tiny { font-size: 0.7rem; color: #f6c96d; opacity: 0.95; }
+  </style>
 </head>
 <body>
-    <canvas id="matrix"></canvas>
-    <div class="studio-box">
-        <h1 class="title">AGNI-X</h1>
-        <p class="sub-title">CORE SYSTEM v1.0</p>
-        <div id="status">STATUS: SECURE</div>
-        <button class="btn" onclick="initialize()">INITIALIZE CORE</button>
-        <button class="btn" onclick="startRecorder()">4K RECORDER</button>
-    </div>
-    <script src="script.js"></script>
+  <canvas id="matrix"></canvas>
+
+  <main class="app">
+    <section class="panel header">
+      <h1>VORTEX-AJ FULL STUDIO ENGINE</h1>
+      <p>BLACK • FIRE-ORANGE • CYBER-GOLD</p>
+    </section>
+
+    <section class="panel eye-wrap">
+      <video id="camera" autoplay playsinline muted></video>
+      <div class="hud">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
+        <div class="scan"></div>
+      </div>
+    </section>
+
+    <section class="panel controls">
+      <button class="btn" id="initBtn">Initialize</button>
+      <button class="btn" id="recordBtn">4K Recorder</button>
+      <div class="readout">
+        <span id="coreMsg">THE BRAIN: Standby</span>
+        <span class="rec" id="recBadge"><span class="dot"></span>REC <span id="recTime">00:00</span></span>
+      </div>
+      <div class="tiny" id="captureInfo">Capture Mode: Hi-Fidelity simulation idle</div>
+    </section>
+
+    <section class="panel dubbing">
+      <button class="btn" id="uploadBtn">Upload Audio</button>
+      <input type="file" id="audioInput" accept="audio/*" hidden>
+      <div class="readout"><span>AI Dubbing Suite</span><span id="dubState">Awaiting file</span></div>
+      <div class="waves" id="waves"></div>
+    </section>
+
+    <section class="panel statusbar">
+      <div>Core Temp: <strong id="temp">42°C</strong></div>
+      <div>AI Sync: <strong id="sync">98%</strong></div>
+      <div>User: <strong>ALI JAAN</strong></div>
+    </section>
+  </main>
+
+  <script>
+    // Orange Matrix Rain (VORTEX letters)
+    const mCanvas = document.getElementById('matrix');
+    const mCtx = mCanvas.getContext('2d');
+    const chars = 'VORTEX';
+    let font = 16;
+    let columns = 0;
+    let drops = [];
+
+    function setupMatrix() {
+      mCanvas.width = innerWidth;
+      mCanvas.height = innerHeight;
+      columns = Math.floor(mCanvas.width / font);
+      drops = Array(columns).fill(1);
+    }
+
+    function drawMatrix() {
+      mCtx.fillStyle = 'rgba(0,0,0,0.08)';
+      mCtx.fillRect(0, 0, mCanvas.width, mCanvas.height);
+      mCtx.fillStyle = '#ff6a00';
+      mCtx.font = font + 'px Courier New, monospace';
+      for (let i = 0; i < drops.length; i++) {
+        const t = chars[Math.floor(Math.random() * chars.length)];
+        mCtx.fillText(t, i * font, drops[i] * font);
+        if (drops[i] * font > mCanvas.height && Math.random() > 0.972) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+
+    setupMatrix();
+    setInterval(drawMatrix, 36);
+    addEventListener('resize', setupMatrix);
+
+    // Cyber click sound via WebAudio
+    function cyberClick() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(220, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1240, ctx.currentTime + 0.06);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    }
+
+    // THE EYE + THE BRAIN
+    const video = document.getElementById('camera');
+    const initBtn = document.getElementById('initBtn');
+    const coreMsg = document.getElementById('coreMsg');
+
+    async function openFrontCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false
+        });
+        video.srcObject = stream;
+      } catch (e) {
+        coreMsg.textContent = 'THE EYE: Camera permission denied/unavailable';
+      }
+    }
+
+    function speakWelcome() {
+      const text = 'Vortex Core Online. Welcome, Ali Jaan.';
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.pitch = 1.25;
+      utter.rate = 1;
+      utter.volume = 1;
+      const voices = speechSynthesis.getVoices();
+      const femaleHint = voices.find(v => /female|zira|susan|samantha|karen|aria|serena/i.test(v.name));
+      if (femaleHint) utter.voice = femaleHint;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+      coreMsg.textContent = 'THE BRAIN: Vortex Core Online';
+    }
+
+    initBtn.addEventListener('click', async () => {
+      cyberClick();
+      await openFrontCamera();
+      speakWelcome();
+    });
+
+    // 4K Recorder simulation
+    const recordBtn = document.getElementById('recordBtn');
+    const recBadge = document.getElementById('recBadge');
+    const recTime = document.getElementById('recTime');
+    const captureInfo = document.getElementById('captureInfo');
+    let recOn = false;
+    let startTS = 0;
+    let recTimer = null;
+
+    function fmt(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    recordBtn.addEventListener('click', () => {
+      cyberClick();
+      recOn = !recOn;
+      if (recOn) {
+        startTS = Date.now();
+        recBadge.style.visibility = 'visible';
+        recordBtn.textContent = 'Stop Recorder';
+        captureInfo.textContent = 'Capture Mode: 4K HDR + Spatial Audio [simulated]';
+        recTimer = setInterval(() => {
+          recTime.textContent = fmt(Math.floor((Date.now() - startTS) / 1000));
+        }, 200);
+      } else {
+        clearInterval(recTimer);
+        recBadge.style.visibility = 'hidden';
+        recTime.textContent = '00:00';
+        recordBtn.textContent = '4K Recorder';
+        captureInfo.textContent = 'Capture Mode: Hi-Fidelity simulation idle';
+      }
+    });
+
+    // AI Dubbing Suite
+    const uploadBtn = document.getElementById('uploadBtn');
+    const audioInput = document.getElementById('audioInput');
+    const dubState = document.getElementById('dubState');
+    const waves = document.getElementById('waves');
+
+    for (let i = 0; i < 28; i++) {
+      const b = document.createElement('span');
+      b.className = 'bar';
+      b.style.animationDelay = `${(i % 7) * 0.08}s`;
+      waves.appendChild(b);
+    }
+
+    uploadBtn.addEventListener('click', () => {
+      cyberClick();
+      audioInput.click();
+    });
+
+    audioInput.addEventListener('change', () => {
+      if (!audioInput.files.length) return;
+      cyberClick();
+      dubState.textContent = 'AI Processing...';
+      waves.classList.add('processing');
+      setTimeout(() => {
+        const name = audioInput.files[0].name;
+        dubState.textContent = `Ready: ${name}`;
+        waves.classList.remove('processing');
+      }, 3200);
+    });
+
+    // System status small live variation
+    const temp = document.getElementById('temp');
+    const sync = document.getElementById('sync');
+    setInterval(() => {
+      const t = (42 + (Math.random() * 1.4 - 0.7)).toFixed(1);
+      const s = Math.max(96, Math.min(99, Math.round(98 + (Math.random() * 2 - 1))));
+      temp.textContent = `${t}°C`;
+      sync.textContent = `${s}%`;
+    }, 2200);
+  </script>
 </body>
 </html>
