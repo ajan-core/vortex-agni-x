@@ -1,4 +1,4 @@
-// Matrix Animation
+// AGNI-X ADVANCED ENGINE
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
 canvas.height = window.innerHeight; canvas.width = window.innerWidth;
@@ -18,11 +18,23 @@ function draw() {
 }
 setInterval(draw, 35);
 
-// Voice Function
+// --- NEW: CAMERA & VOICE SYSTEM ---
 function initialize() {
-    const msg = new SpeechSynthesisUtterance("Vortex Core Active. Welcome, Ali Jaan.");
+    // Voice Welcome
+    const msg = new SpeechSynthesisUtterance("Initializing Vortex Studio. Welcome, Ali Jaan.");
     window.speechSynthesis.speak(msg);
+
+    // Ask for Camera Access
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(function(stream) {
+        alert("Camera Linked Successfully!");
+    })
+    .catch(function(err) {
+        alert("Camera Error: Please allow permissions.");
+    });
 }
+
 function startRecorder() {
-    alert("4K Recorder Module Initialized!");
-                     }
+    alert("System Message: 4K Recording Engine is Warm. Ready for VORTEX-AJ.");
+    }
+        
